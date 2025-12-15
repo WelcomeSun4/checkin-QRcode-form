@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>入社式チェックインQR</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+<h2>入社式 チェックイン用QRコード</h2>
+
+<div id="qrcode"></div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+
+  if (!token) {
+    document.body.innerHTML = "トークンがありません";
+  } else {
+    // チェックイン用URL生成
+    const checkinURL = "https://WelcomeSun4.github.io/checkin-QRcode-form/checkin.html?token=" + token;
+
+    new QRCode(document.getElementById("qrcode"), checkinURL);
+  }
+</script>
+
+</body>
+</html>
