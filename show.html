@@ -1,28 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>入社式チェックインQRコード</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>入社式・個人用QRコード</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+      text-align: center;
+      background-color: #f7f7f7;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+    #message {
+      margin: 12px 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    #qrcode {
+      margin: 20px auto;
+      padding: 12px;
+      background: #fff;
+      display: inline-block;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .token-text {
+      font-size: 12px;
+      color: #555;
+      margin-top: 8px;
+      word-break: break-all;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-<h2>入社式チェックインQRコード</h2>
+  <h1>入社式 受付用 QRコード</h1>
+  <div id="message"></div>
+  <div id="qrcode"></div>
+  <div id="tokenInfo" class="token-text"></div>
 
-<div id="qrcode"></div>
+  <script>
+    (function () {
+      const messageEl = document.getElementById("message");
+      const qrcodeEl = document.getElementById("qrcode");
+      const tokenInfoEl = document.getElementById("tokenInfo");
 
-<script>
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
 
-  if (!token) {
-    document.body.innerHTML = "トークンがありません";
-  } else {
-    // チェックイン用URL生成
-    const checkinURL = "https://WelcomeSun4.github.io/checkin-QRcode-form/checkin.html?token=" + token;
+      // エラーチェック①：token がない
+      if (!token) {
+        messageEl.innerHTML =
+          "<p style='color:red;'>トークン情報がURLに含まれていません。案内されたURLをもう一度ご確認ください。<br>ご確認いただいても解消しない場合は、お手数ですが受付担当者にお声がけください。</p>";
+        return;
+      }
 
-    new QRCode(document.getElementById("qrcode"), checkinURL);
-  }
-</script>
+      // エラーチェック②：token が不正（極端に短い）
+      if (token.length < 5) {
+        messageEl.innerHTML =
+          "<p style='color:red;'>トークン情報が正しくありません。案内されたURLをもう一度ご確認ください。<br>ご確認いただいても解消しない場合は、お手数ですが受付担当者にお声がけください。</p>";
+        return;
+      }
 
+      // 正常時：受付誘導用メッセージ
+      messageEl.innerHTML =
+        "QRコードが正常に生成されました。<br>この画面を受付担当者に提示し、QRコードを読み取ってもらってください。";
+
+      try {
+        new QRCode(qrcodeEl, {
+          text: token,
+          width: 200,
+          height: 200,
+          correctLevel: QRCode.CorrectLevel.H
+        });
+
+        tokenInfoEl.textContent = "Token: " + token;
+      } catch (e) {
+        console.error(e);
+        messageEl.innerHTML =
+          "<p style='color:red;'>QRコードの表示に失敗しました。<br>お手数ですが受付担当者にお声がけください。</p>";
+      }
+    })();
+  </script>
 </body>
 </html>
